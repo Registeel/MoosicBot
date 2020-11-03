@@ -20,7 +20,7 @@ module.exports =
         var cookieParser = require('cookie-parser');
 
         var client_id = process.env.SPCLIENTID; // Your client id
-        var client_secret = proces.env.SPSCT; // Your secret
+        var client_secret = process.env.SPSCT; // Your secret
         var redirect_uri = 'https://google.ca/'; // Your redirect uri
 
         var authOptions = {

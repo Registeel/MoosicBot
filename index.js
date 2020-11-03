@@ -21,22 +21,25 @@ bot.on('message', async msg => {
     //Ignore messages from bot
     if (msg.author.bot) return;
 
-  const args = msg.content.split(/ +/);
-  const command = args.shift().toLowerCase();
-  console.info(`Called command: ${command}`);
+    const args = msg.content.split(/ +/);
+    const command = args.shift().toLowerCase();
 
-  if (!bot.commands.has(command)) return;
+    console.info(`Called command: ${command}`);
+
+    console.log(botCommands);
+    if (!bot.commands.has(command)) return;
 
     try {
         var passArgs = args;
-        if (command == '~play') {
+        console.log(command);
+        if (command.includes('~')) {
             bot.commands.get(command).execute(msg, queue);
         }
         else {
             bot.commands.get(command).execute(msg, passArgs);
         }
-  } catch (error) {
-    console.error(error);
-    msg.reply('there was an error trying to execute that command!');
-  }
+    } catch (error) {
+        console.error(error);
+        msg.reply('there was an error trying to execute that command!');
+    }
 });

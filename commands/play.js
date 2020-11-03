@@ -48,8 +48,6 @@ module.exports =
         if (msg.content.includes('spotify')) {
 
             var playlistString = msg.content.substring(msg.content.indexOf("playlist") + 9, msg.content.indexOf("?"));
-            console.log("Playlist id");
-            console.log(playlistString);
 
             var check = request.post(authOptions, function (error, response, body) {
                 json = JSON.parse(body);
@@ -77,21 +75,16 @@ module.exports =
                         spotifyQueueSearch.push(spotifySearchString);
                     }
 
-                    console.log("Hit pre-timeout");
 
                     for (var j = 0; j < spotifyQueueSearch.length; j++) {
-                        console.log("In add loop");
                         setTimeout(() =>
                         {
-                            console.log("Start " + (j + 2) + " spotify song in queue");
                             addYT(spotifyQueueSearch, voiceChannel, msg, queue);
                             spotifyQueueSearch.shift();
-                            console.log("Popped off " + (j + 2) + " spotify song in queue");
                         }, 1000 * (j + 1)); 
                     }
                 });
 
-                console.log("Queue" + queue);
             });
         }
         //else if (msg.content.includes('&list=') && msg.content.includes('youtube')) {
@@ -101,14 +94,13 @@ module.exports =
             var ytSearchUrl = "";
             var ytTitle = "";
 
+            console.log("Search String");
             console.log(searchString);
             request.get("https://www.youtube.com/results?search_query=" + searchString, function (error, response, body) {
                 var indices = getIndicesOf("\"videoIds\"", body);
                 var titleIndices = getIndicesOf("\"title\":{\"runs\":[{\"text\"", body);
                 ytSearchUrl = "https://www.youtube.com/watch?v=" + body.substring(indices[0]+13, body.indexOf(',', indices[0])-2);
                 ytTitle = body.substring(titleIndices[0] + 26, body.indexOf(',', titleIndices[0]) - 3);
-                console.log("Server Queue before YT search play");
-                console.log(serverQueue);
                 songHelper(ytTitle, ytSearchUrl, voiceChannel, msg, queue);
             });    
         }
@@ -129,7 +121,6 @@ function play(guild, song, queue) {
     const dispatcher = sQ.connection
         .playStream(ytdl(song.url))
         .on("end", () => {
-            console.log("Song Finished");
             sQ.songs.shift();
             play(guild, sQ.songs[0], queue);
         })
@@ -161,8 +152,6 @@ async function songHelper(ytTitle, ytSearchUrl, voiceChannel, msg, queue) {
         url: ytSearchUrl,
     };
 
-    console.log("Check server queue in songhelper");
-    console.log(serverQueue);
     if (!serverQueue) {
         const queueContruct = {
             textChannel: msg.channel,
@@ -173,17 +162,11 @@ async function songHelper(ytTitle, ytSearchUrl, voiceChannel, msg, queue) {
             playing: true,
         };
         // Setting the queue using our contract
-        console.log("Check queue before it is set");
-        console.log(queue);
         queue.set(msg.guild.id, queueContruct);
-        console.log("Check queue after it is set");
-        console.log(queue);
         // Pushing the song to our songs array
         queueContruct.songs.push(song);
 
         serverQueue = queue.get(msg.guild.id);
-        console.log("Check server again after set");
-        console.log(serverQueue);
 
         try {
             // Here we try to join the voicechat and save our connection into our object.
@@ -199,14 +182,13 @@ async function songHelper(ytTitle, ytSearchUrl, voiceChannel, msg, queue) {
         }
     } else {
         serverQueue.songs.push(song);
-        console.log(serverQueue.songs);
         return msg.channel.send(`${song.title} has been added to the queue!`);
     }
 }
 
 function addYT(spotifyQueueSearch, voiceChannel, msg, queue) {
-    console.log("hit recursive add");
-    request.get("https://www.youtube.com/results?search_query=" + spotifyQueueSearch[0], function (error, response, body) {
+    var url = encodeURI("https://www.youtube.com/results?search_query=" + spotifyQueueSearch[0]);
+    request.get(url, function (error, response, body) {
         var indices = getIndicesOf("\"videoIds\"", body);
         var titleIndices = getIndicesOf("\"title\":{\"runs\":[{\"text\"", body);
         var ytSearchUrl = "https://www.youtube.com/watch?v=" + body.substring(indices[0] + 13, body.indexOf(',', indices[0]) - 2);

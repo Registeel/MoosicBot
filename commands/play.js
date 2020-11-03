@@ -1,6 +1,7 @@
 const fetch = require('node-fetch');
 const ytdl = require('ytdl-core');
 const request = require('request');
+require('dotenv').config();
 var serverQueue;
 
 
@@ -18,8 +19,8 @@ module.exports =
         var querystring = require('querystring');
         var cookieParser = require('cookie-parser');
 
-        var client_id = 'f7edb45275df440591a208713ae644ed'; // Your client id
-        var client_secret = '67483a72f01248ea8afae2ca69d7070a'; // Your secret
+        var client_id = process.env.SPCLIENTID; // Your client id
+        var client_secret = proces.env.SPSCT; // Your secret
         var redirect_uri = 'https://google.ca/'; // Your redirect uri
 
         var authOptions = {

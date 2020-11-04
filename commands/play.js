@@ -47,8 +47,13 @@ module.exports =
 
         var access_token = '';
         if (msg.content.includes('spotify')) {
-
-            var playlistString = msg.content.substring(msg.content.indexOf("playlist") + 9, msg.content.indexOf("?"));
+            var playlistString = "";
+            if (msg.content.indexOf("?") != -1) {
+                playlistString = msg.content.substring(msg.content.indexOf("playlist") + 9, msg.content.indexOf("?"));
+            }
+            else {
+                playlistString = msg.content.substring(msg.content.indexOf("playlist") + 9);
+            }
 
             var check = request.post(authOptions, function (error, response, body) {
                 json = JSON.parse(body);

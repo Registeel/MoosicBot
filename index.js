@@ -26,7 +26,6 @@ bot.on('message', async msg => {
 
     console.info(`Called command: ${command}`);
 
-    console.log(botCommands);
     if (!bot.commands.has(command)) return;
 
     try {

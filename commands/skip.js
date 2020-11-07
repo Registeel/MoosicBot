@@ -13,10 +13,9 @@ module.exports =
         if (!serverQueue) {
             return msg.channel.send("There is no song that I could skip!");
         }
-        console.log("ServerQueue Connection Object");
-        console.log(serverQueue.connection);
-        console.log("ServerQueue Connection Dispatcher Object");
-        console.log(serverQueue.connection.dispatcher);
+        console.log("Hit dispatcher end in skip");
+        console.log("serverQueue connection in skip");
+        console.log(serverQueue.connection.player);
         serverQueue.connection.dispatcher.end();
     },
 };

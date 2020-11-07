@@ -3,5 +3,6 @@ module.exports = {
     Play: require('./play'),
     Leave: require('./leave'),
     Skip: require('./skip'),
-    Stop: require('./stop')
+    Stop: require('./stop'),
+    Queue: require('./queue'),
 };

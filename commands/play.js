@@ -1,6 +1,7 @@
 const fetch = require('node-fetch');
-const ytdl = require('ytdl-core');
+const ytdlds = require('ytdl-core-discord');
 const request = require('request');
+const constants = require('./constants.js');
 require('dotenv').config();
 var serverQueue;
 
@@ -91,6 +92,7 @@ module.exports =
                     var spotifyQueueSearch = [];
 
                     var trackList = body.tracks.items;
+                    msg.channel.send("Adding " + body.tracks.items.length + " songs from Spotify playlist");
                     for (var i = 0; i < trackList.length; i++) {
                         var spotifySearchString = "";
                         var track = trackList[i].track;
@@ -106,7 +108,6 @@ module.exports =
                         setTimeout(() =>
                         {
                             addYT(spotifyQueueSearch[0]);
-                            //console.log("Added " + spotifyQueueSearch[0] + " to queue");
                             spotifyQueueSearch.shift();
                         }, 1000 * (j + 1)); 
                     }
@@ -137,9 +138,10 @@ module.exports =
     }
 };
 
-function play(guild, song, queue) {
+async function play(guild, song, queue) {
     const sQ = queue.get(guild.id);
     if (!song) {
+        sQ.playing = false;
         sQ.voiceChannel.leave();
         queue.delete(guild.id);
         return;
@@ -147,16 +149,24 @@ function play(guild, song, queue) {
 
     sQ.textChannel.send(`Now playing: **${song.title}**`);
 
-    var options = {
-        highWaterMark: 1<<25
-    }
-    const dispatcher = sQ.connection
-        .playStream(ytdl(song.url, options))
+    //
+
+    const dispatcher = sQ.connection.playOpusStream(await ytdlds(song.url))
+        //.playStream(ytdl(song.url, options))
         .on("end", () => {
             console.log("Hit song end");
             console.log("Hit song end in doneEnd");
-            sQ.songs.shift();
-            play(guild, sQ.songs[0], queue);
+            if (!constants.Jump) {
+                constants.CurrPlayIndex = constants.CurrPlayIndex + 1;
+            }
+            constants.Jump = false;
+            //sQ.songs.shift();
+            if (sQ.songs.length > constants.CurrPlayIndex) {
+                play(guild, sQ.songs[constants.CurrPlayIndex], queue);
+            }
+            else {
+                play(guild, null, queue);
+            }
         })
         .on("error", error => console.error(error));
     dispatcher.setVolumeLogarithmic(sQ.volume / 5);    

@@ -1,4 +1,5 @@
 var serverQueue;
+const constants = require('./constants.js');
 module.exports =
 {
     name: '~stop',
@@ -9,7 +10,7 @@ module.exports =
             return msg.channel.send(
                 "You have to be in a voice channel to stop the music!"
             );
-        serverQueue.songs = [];
-        serverQueue.connection.dispatcher.end();
+        constants.End = true;
+        serverQueue.connection.dispatcher.pause();
     },
 };

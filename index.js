@@ -4,6 +4,7 @@ const bot = new Discord.Client();
 bot.commands = new Discord.Collection();
 const botCommands = require('./commands');
 const queue = new Map();
+const currPlayIndex = 0;
 
 Object.keys(botCommands).map(key => {
   bot.commands.set(botCommands[key].name, botCommands[key]);

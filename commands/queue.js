@@ -1,4 +1,5 @@
 var serverQueue;
+const constants = require('./constants.js');
 module.exports =
 {
     name: '~queue',
@@ -9,10 +10,12 @@ module.exports =
         console.log(msg.content);
         console.log(page);
         console.log(page.length);
-        var pageNum = page.length > 1 ? page[1] : 1;
-        console.log("Page num after length check");
-        console.log(pageNum);
-        if (!Number.isInteger(+pageNum)) {
+        var pageNum = page.length > 1 ? page[1] : -999;
+        if (pageNum == -999) {
+            pageNum = (((constants.CurrPlayIndex + 1) - ((constants.CurrPlayIndex + 1) % 10)) / 10) + 1;
+            console.log("Active pageNum: " + pageNum);
+        }
+        else if (!Number.isInteger(+pageNum)) {
             pageNum = 1;
         }
         else if (pageNum < 0) {
@@ -31,11 +34,16 @@ module.exports =
         var queueString = "```\n";
         queueString += "Page " + pageNum + "/" + numPages + "\n";
         var loopLength = serverQueue.songs.length > iModifier + 10 ? iModifier + 10 : serverQueue.songs.length;
-        iModifier = iModifier > serverQueue.songs.length ? songList.length - songList.length % 10 : iModifier;
+
+        iModifier = iModifier > serverQueue.songs.length ? serverQueue.songs.length - serverQueue.songs.length % 10 : iModifier;
         if (serverQueue) {
             for (i = iModifier; i < loopLength; i++) {
                 var numInQueue = i + 1;
-                queueString += "[" + numInQueue + "] " + serverQueue.songs[i].title + "\n";
+                queueString += "[" + numInQueue + "] " + serverQueue.songs[i].title;
+                if (i == constants.CurrPlayIndex) {
+                    queueString += " (Now Playing)";
+                }
+                queueString += "\n";
             }
             queueString += "\n```";
             msg.channel.send(queueString);

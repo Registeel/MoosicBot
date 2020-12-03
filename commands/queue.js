@@ -25,28 +25,33 @@ module.exports =
             pageNum = 1;
         }
 
-        var queueCalcNum = serverQueue.songs.length + 9;
-        var numPages = (queueCalcNum - queueCalcNum % 10) / 10;
-
-        pageNum = (pageNum - 1) * 10 > serverQueue.songs.length ? numPages : pageNum;
-        var iModifier = (pageNum - 1) * 10;
-
-        var queueString = "```\n";
-        queueString += "Page " + pageNum + "/" + numPages + "\n";
-        var loopLength = serverQueue.songs.length > iModifier + 10 ? iModifier + 10 : serverQueue.songs.length;
-
-        iModifier = iModifier > serverQueue.songs.length ? serverQueue.songs.length - serverQueue.songs.length % 10 : iModifier;
         if (serverQueue) {
-            for (i = iModifier; i < loopLength; i++) {
-                var numInQueue = i + 1;
-                queueString += "[" + numInQueue + "] " + serverQueue.songs[i].title;
-                if (i == constants.CurrPlayIndex) {
-                    queueString += " (Now Playing)";
+            var queueCalcNum = serverQueue.songs.length + 9;
+            var numPages = (queueCalcNum - queueCalcNum % 10) / 10;
+
+            pageNum = (pageNum - 1) * 10 > serverQueue.songs.length ? numPages : pageNum;
+            var iModifier = (pageNum - 1) * 10;
+
+            var queueString = "```\n";
+            queueString += "Page " + pageNum + "/" + numPages + "\n";
+            var loopLength = serverQueue.songs.length > iModifier + 10 ? iModifier + 10 : serverQueue.songs.length;
+
+            iModifier = iModifier > serverQueue.songs.length ? serverQueue.songs.length - serverQueue.songs.length % 10 : iModifier;
+            if (serverQueue) {
+                for (i = iModifier; i < loopLength; i++) {
+                    var numInQueue = i + 1;
+                    queueString += "[" + numInQueue + "] " + serverQueue.songs[i].title;
+                    if (i == constants.CurrPlayIndex) {
+                        queueString += " (Now Playing)";
+                    }
+                    queueString += "\n";
                 }
-                queueString += "\n";
+                queueString += "\n```";
+                msg.channel.send(queueString);
             }
-            queueString += "\n```";
-            msg.channel.send(queueString);
+        }
+        else {
+            msg.channel.send("Queue is empty");
         }
     },
 };

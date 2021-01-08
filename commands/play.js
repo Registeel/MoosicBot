@@ -1,7 +1,9 @@
 const fetch = require('node-fetch');
 const ytdlds = require('ytdl-core-discord');
+const ytdl = require('ytdl-core');
 const request = require('request');
 const constants = require('./constants.js');
+const twitchStreams = require('twitch-get-stream');
 require('dotenv').config();
 var serverQueue;
 
@@ -17,7 +19,10 @@ module.exports =
 
         const args = msg.content.split(" ");
         var searchString = msg.content.substring(msg.content.indexOf(" "));
+        var twitchString = msg.content.substring(msg.content.split(' ', 2).join(' ').length);
         serverQueue = queue.get(msg.guild.id);
+
+        console.log("content: " + msg.content);
 
         const voiceChannel = msg.member.voiceChannel;
         if (!voiceChannel)
@@ -70,10 +75,20 @@ module.exports =
         if (msg.content.includes('spotify')) {
             var playlistString = "";
             if (msg.content.indexOf("?") != -1) {
-                playlistString = msg.content.substring(msg.content.indexOf("playlist") + 9, msg.content.indexOf("?"));
+                if (msg.content.includes("playlist")) {
+                    playlistString = msg.content.substring(msg.content.indexOf("playlist") + 9, msg.content.indexOf("?"));
+                }
+                else {
+                    playlistString = msg.content.substring(msg.content.indexOf("album") + 6, msg.content.indexOf("?"));
+                }
             }
             else {
-                playlistString = msg.content.substring(msg.content.indexOf("playlist") + 9);
+                if (msg.content.includes("playlist")) {
+                    playlistString = msg.content.substring(msg.content.indexOf("playlist") + 9);
+                }
+                else {
+                    playlistString = msg.content.substring(msg.content.indexOf("album") + 6);
+                }
             }
 
             request.post(authOptions, function (error, response, body) {
@@ -81,7 +96,7 @@ module.exports =
                 access_token = json.access_token;
 
                 var options = {
-                    url: 'https://api.spotify.com/v1/playlists/' + playlistString,
+                    url: msg.content.includes("playlist") ? 'https://api.spotify.com/v1/playlists/' + playlistString : 'https://api.spotify.com/v1/albums/' + playlistString,
                     headers: { 'Authorization': 'Bearer ' + access_token },
                     json: true
                 };
@@ -92,17 +107,23 @@ module.exports =
                     var spotifyQueueSearch = [];
 
                     var trackList = body.tracks.items;
-                    msg.channel.send("Adding " + body.tracks.items.length + " songs from Spotify playlist");
+
+                    if (msg.content.includes("playlist")) {
+                        msg.channel.send("Adding " + trackList.length + " songs from Spotify playlist");
+                    }
+                    else {
+                        msg.channel.send("Adding " + trackList.length + " songs from Spotify album");
+                    }
+
                     for (var i = 0; i < trackList.length; i++) {
                         var spotifySearchString = "";
-                        var track = trackList[i].track;
+                        var track = msg.content.includes("playlist") ? trackList[i].track : trackList[i];
                         for (var j = 0; j < track.artists.length; j++) {
                             spotifySearchString += track.artists[j].name + " ";
                         }
                         spotifySearchString += "- " + track.name;    
                         spotifyQueueSearch.push(spotifySearchString);
                     }
-
 
                     for (var j = 0; j < spotifyQueueSearch.length; j++) {
                         setTimeout(() =>
@@ -115,6 +136,19 @@ module.exports =
                 });
 
             });
+        }
+        else if (msg.content.includes('twitchstream')) {
+            console.log('Hit Twitch Stream');
+            console.log(twitchString);
+            try {
+                twitchStreams.get(twitchString.trim()).then(function (streams) {
+                    console.log(streams);
+                });
+            }
+            catch (error) {
+                console.log("Error occurred");
+                console.log(error);
+            }
         }
         //else if (msg.content.includes('&list=') && msg.content.includes('youtube')) {
 
@@ -151,7 +185,7 @@ async function play(guild, song, queue) {
 
     //
 
-    const dispatcher = sQ.connection.playOpusStream(await ytdlds(song.url))
+    const dispatcher = sQ.connection.playStream(await ytdl(song.url))
         //.playStream(ytdl(song.url, options))
         .on("end", () => {
             console.log("Hit song end");

@@ -40,9 +40,15 @@ module.exports =
             if (serverQueue) {
                 for (i = iModifier; i < loopLength; i++) {
                     var numInQueue = i + 1;
+                    if (i == constants.CurrPlayIndex) {
+                        queueString += "-----------------------------------------------------\n";
+                    }
                     queueString += "[" + numInQueue + "] " + serverQueue.songs[i].title;
                     if (i == constants.CurrPlayIndex) {
-                        queueString += " (Now Playing)";
+                        queueString += " (Now Playing)\n";
+                    }
+                    if (i == constants.CurrPlayIndex) {
+                        queueString += "-----------------------------------------------------";
                     }
                     queueString += "\n";
                 }
